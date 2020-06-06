@@ -71,6 +71,6 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 #Pycharm
-.idea/.gitignore
+.idea
 venv
 config.py
