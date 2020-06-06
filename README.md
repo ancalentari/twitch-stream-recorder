@@ -1,6 +1,6 @@
 # Ancalentari Twitch Stream Recorder
 This script allows you to record twitch streams live to .mp4 files.  
-It is an improved version of [junian's twitch-recorder](https://gist.github.com/junian/b41dd8e544bf0e3980c971b0d015f5f6), also migrated to [**helix**](https://dev.twitch.tv/docs/api) - the new twitch API. It uses OAuth2.
+It is an improved version of [junian's twitch-recorder](https://gist.github.com/junian/b41dd8e544bf0e3980c971b0d015f5f6), migrated to [**helix**](https://dev.twitch.tv/docs/api) - the new twitch API. It uses OAuth2.
 ## Requirements
 1. [python3.8](https://www.python.org/downloads/release/python-380/) or higher  
 2. [streamlink](https://streamlink.github.io/)  
