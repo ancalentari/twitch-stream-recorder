@@ -124,7 +124,7 @@ class TwitchRecorder:
                 logging.info("unauthorized, will attempt to log back in immediately")
                 self.access_token = self.fetch_access_token()
             elif status == TwitchResponseStatus.ONLINE:
-                logging.info(self.username, "online, stream recording in session")
+                logging.info("%s online, stream recording in session", self.username)
 
                 channels = info["data"]
                 channel = next(iter(channels), None)
