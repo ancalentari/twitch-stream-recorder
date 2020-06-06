@@ -12,8 +12,8 @@ It is an improved version of [junian's twitch-recorder](https://gist.github.com/
 ```properties
 root_path = "/home/abathur/Videos/twitch"
 username = "forsen"
-client_id = "client id"
-client_secret = "client secret"
+client_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+client_secret = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 ```
 `root_path` - path to a folder where you want your VODs to be saved to  
 `username` - name of the streamer you want to record by default  
