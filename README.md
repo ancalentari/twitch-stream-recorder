@@ -1,12 +1,14 @@
-# Twitch Stream Recorder
+# Ancalentari Twitch Stream Recorder
+This script allows you to record twitch streams live to .mp4 files.  
+It is an improved version of [junian's twitch-recorder](https://gist.github.com/junian/b41dd8e544bf0e3980c971b0d015f5f6), also migrated to [**helix**](https://dev.twitch.tv/docs/api) - the new twitch API. It uses OAuth2.
 ## Requirements
-[python3.8](https://www.python.org/downloads/release/python-380/) or higher  
-[streamlink](https://streamlink.github.io/)
+1. [python3.8](https://www.python.org/downloads/release/python-380/) or higher  
+2. [streamlink](https://streamlink.github.io/)  
+3. [ffmpeg](https://ffmpeg.org/)
 
 ## Setting up
-This script allows you to record twitch streams live to a .mp4 files. But first:
 1. Install [streamlink](https://streamlink.github.io/)
-1. Create config.py file in the same directory as `twitch-recorder.py` with:
+2. Create `config.py` file in the same directory as `twitch-recorder.py` with:
 ```properties
 root_path = "/home/abathur/Videos/twitch"
 username = "forsen"
