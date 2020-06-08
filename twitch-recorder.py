@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 import sys
+import shutil
 import time
 
 import requests
@@ -24,6 +25,7 @@ class TwitchRecorder:
     def __init__(self):
         # global configuration
         self.ffmpeg_path = "ffmpeg"
+        self.disable_ffmpeg = False
         self.refresh = 15
         self.root_path = config.root_path
 
@@ -71,20 +73,27 @@ class TwitchRecorder:
                 logging.info("fixing previously recorded files")
             for f in video_list:
                 recorded_filename = os.path.join(recorded_path, f)
-                logging.info("fixing %s", recorded_filename)
-                try:
-                    subprocess.call(
-                        [self.ffmpeg_path, "-err_detect", "ignore_err", "-i", recorded_filename, "-c", "copy",
-                         os.path.join(processed_path, f)])
-                    os.remove(recorded_filename)
-                except Exception as e:
-                    logging.error(e)
+                processed_filename = os.path.join(processed_path, f)
+                if self.disable_ffmpeg:
+                    shutil.move(recorded_filename, processed_filename)
+                else:
+                    self.ffmpeg_copy_and_fix_errors(recorded_filename, processed_filename)
         except Exception as e:
             logging.error(e)
 
         logging.info("checking for %s every %s seconds, recording with %s quality",
                      self.username, self.refresh, self.quality)
         self.loop_check(recorded_path, processed_path)
+
+    def ffmpeg_copy_and_fix_errors(self, recorded_filename, processed_filename):
+        logging.info("fixing %s", recorded_filename)
+        try:
+            subprocess.call(
+                [self.ffmpeg_path, "-err_detect", "ignore_err", "-i", recorded_filename, "-c", "copy",
+                 processed_filename])
+            os.remove(recorded_filename)
+        except Exception as e:
+            logging.error(e)
 
     def check_user(self):
         info = None
@@ -164,7 +173,7 @@ def main(argv):
     logging.getLogger().addHandler(logging.StreamHandler())
 
     try:
-        opts, args = getopt.getopt(argv, "hu:q:", ["username=", "quality="])
+        opts, args = getopt.getopt(argv, "hu:q:l:", ["username=", "quality=", "log=", "logging=", "disable-ffmpeg"])
     except getopt.GetoptError:
         print(usage_message)
         sys.exit(2)
@@ -177,10 +186,14 @@ def main(argv):
         elif opt in ("-q", "--quality"):
             twitch_recorder.quality = arg
         elif opt in ("-l", "--log", "--logging"):
-            logging_level = getattr(logging, opt.upper(), None)
+            logging_level = getattr(logging, arg.upper(), None)
             if not isinstance(logging_level, int):
                 raise ValueError("invalid log level: %s" % logging_level)
             logging.basicConfig(level=logging_level)
+            logging.info("logging configured to %", arg.upper())
+        elif opt == "--disable-ffmpeg":
+            twitch_recorder.disable_ffmpeg = True
+            logging.info("ffmpeg disabled")
 
     twitch_recorder.run()
 
