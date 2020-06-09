@@ -39,6 +39,10 @@ To change default logging use `-l`, `--log` or `--logging`
 ```shell script
 python3.8 twitch-recorder.py --log warn
 ```
+To disable ffmpeg processing (fixing errors in recorded file) use `--disable-ffmpeg`
+```shell script
+python3.8 twitch-recorder.py --disable-ffmpeg
+```
 If you want to run the script as a job in the background and be able to close the terminal:
 ```shell script
 nohup python3.8 twitch-recorder.py >/dev/null 2>&1 &
