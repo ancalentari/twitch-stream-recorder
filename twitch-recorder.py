@@ -190,7 +190,7 @@ def main(argv):
             if not isinstance(logging_level, int):
                 raise ValueError("invalid log level: %s" % logging_level)
             logging.basicConfig(level=logging_level)
-            logging.info("logging configured to %", arg.upper())
+            logging.info("logging configured to %s", arg.upper())
         elif opt == "--disable-ffmpeg":
             twitch_recorder.disable_ffmpeg = True
             logging.info("ffmpeg disabled")
