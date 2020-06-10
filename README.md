@@ -7,8 +7,13 @@ It is an improved version of [junian's twitch-recorder](https://gist.github.com/
 3. [ffmpeg](https://ffmpeg.org/)
 
 ## Setting up
-1. Install [streamlink](https://streamlink.github.io/)
-2. Create `config.py` file in the same directory as `twitch-recorder.py` with:
+1) If your version of streamlink is older than 1.4.1:
+    * install new one and checkit with: `streamlink --version-check`
+
+2) Install `requests` module [if you don't have it](https://pypi.org/project/requests/)  
+   * Windows:    ```python -m pip install requests```  
+   * Linux:      ```python3.8 -m pip install requests```
+3) Create `config.py` file in the same directory as `twitch-recorder.py` with:
 ```properties
 root_path = "/home/abathur/Videos/twitch"
 username = "forsen"
@@ -59,3 +64,9 @@ And now you can just kill the job:
 ```shell script
 kill %1
 ```
+### On Windows
+You can run the scipt from `cmd` or [terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab), by simply going to the directory where the script is located at and using command:
+```shell script
+python twitch-recorder.py
+```
+The optional parameters should work exactly the same as on Linux.
