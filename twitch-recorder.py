@@ -67,17 +67,13 @@ class TwitchRecorder:
 
         # fix videos from previous recording session
         try:
-            video_list = [f for f in os.listdir(recorded_path) if
-                          os.path.isfile(os.path.join(recorded_path, f))]
+            video_list = [f for f in os.listdir(recorded_path) if os.path.isfile(os.path.join(recorded_path, f))]
             if len(video_list) > 0:
-                logging.info("fixing previously recorded files")
+                logging.info("processing previously recorded files")
             for f in video_list:
                 recorded_filename = os.path.join(recorded_path, f)
                 processed_filename = os.path.join(processed_path, f)
-                if self.disable_ffmpeg:
-                    shutil.move(recorded_filename, processed_filename)
-                else:
-                    self.ffmpeg_copy_and_fix_errors(recorded_filename, processed_filename)
+                self.process_recorded_file(recorded_filename, processed_filename)
         except Exception as e:
             logging.error(e)
 
@@ -85,8 +81,15 @@ class TwitchRecorder:
                      self.username, self.refresh, self.quality)
         self.loop_check(recorded_path, processed_path)
 
+    def process_recorded_file(self, recorded_filename, processed_filename):
+        if self.disable_ffmpeg:
+            logging.info("moving: %s", recorded_filename)
+            shutil.move(recorded_filename, processed_filename)
+        else:
+            logging.info("fixing %s", recorded_filename)
+            self.ffmpeg_copy_and_fix_errors(recorded_filename, processed_filename)
+
     def ffmpeg_copy_and_fix_errors(self, recorded_filename, processed_filename):
-        logging.info("fixing %s", recorded_filename)
         try:
             subprocess.call(
                 [self.ffmpeg_path, "-err_detect", "ignore_err", "-i", recorded_filename, "-c", "copy",
@@ -113,7 +116,6 @@ class TwitchRecorder:
                     status = TwitchResponseStatus.UNAUTHORIZED
                 if e.response.status_code == 404:
                     status = TwitchResponseStatus.NOT_FOUND
-
         return status, info
 
     def loop_check(self, recorded_path, processed_path):
@@ -144,25 +146,20 @@ class TwitchRecorder:
                 filename = "".join(x for x in filename if x.isalnum() or x in [" ", "-", "_", "."])
 
                 recorded_filename = os.path.join(recorded_path, filename)
+                processed_filename = os.path.join(processed_path, filename)
 
                 # start streamlink process
                 subprocess.call(
                     ["streamlink", "--twitch-oauth-token", self.access_token, "twitch.tv/" + self.username,
                      self.quality, "-o", recorded_filename])
 
-                logging.info("recording stream is done, fixing video file")
+                logging.info("recording stream is done, processing video file")
                 if os.path.exists(recorded_filename) is True:
-                    try:
-                        subprocess.call(
-                            [self.ffmpeg_path, "-err_detect", "ignore_err", "-i", recorded_filename, "-c", "copy",
-                             os.path.join(processed_path, filename)])
-                        os.remove(recorded_filename)
-                    except Exception as e:
-                        logging.error(e)
+                    self.process_recorded_file(recorded_filename, processed_filename)
                 else:
                     logging.info("skip fixing, file not found")
 
-                logging.info("fixing is done, going back to checking...")
+                logging.info("processing is done, going back to checking...")
                 time.sleep(self.refresh)
 
 
