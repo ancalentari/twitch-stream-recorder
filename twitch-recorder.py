@@ -150,9 +150,8 @@ class TwitchRecorder:
 
                 # start streamlink process
                 subprocess.call(
-                    ["streamlink", "--twitch-disable-ads", "twitch.tv/" + self.username,
- self.quality, "-o", recorded_filename])
-                
+                    ["streamlink", "--twitch-disable-ads", "twitch.tv/" + self.username, self.quality,
+                     "-o", recorded_filename])
 
                 logging.info("recording stream is done, processing video file")
                 if os.path.exists(recorded_filename) is True:

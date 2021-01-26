@@ -7,8 +7,10 @@ It is an improved version of [junian's twitch-recorder](https://gist.github.com/
 3. [ffmpeg](https://ffmpeg.org/)
 
 ## Setting up
-1) If your version of streamlink is older than 1.4.1:
-    * install new one and check the result with: `streamlink --version-check`
+1) Check if you have latest version of streamlink:
+    * `streamlink --version` shows current version
+    * `streamlink --version-check` shows available upgrade
+    * `sudo pip install --upgrade streamlink` do upgrade
 
 2) Install `requests` module [if you don't have it](https://pypi.org/project/requests/)  
    * Windows:    ```python -m pip install requests```  
