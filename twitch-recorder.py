@@ -159,7 +159,7 @@ class TwitchRecorder:
                 streamlink_args = ["streamlink"]
                 if self.twitch_oauth_token is not None:
                     logging.info("Use Twitch OAuth token")
-                    streamlink_args.extend(["--twitch-oauth-token", "Authorization=\"OAuth " + self.twitch_oauth_token + "\""])
+                    streamlink_args.extend(["--twitch-api-header", "Authorization=\"OAuth " + self.twitch_oauth_token + "\""])
                 else:
                     logging.info("Use --twitch-disable-ads option")
                     streamlink_args.append("--twitch-disable-ads")
