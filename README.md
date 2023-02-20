@@ -21,13 +21,13 @@ root_path = "/home/abathur/Videos/twitch"
 username = "forsen"
 client_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 client_secret = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-twitch_oauth_token = ""
+twitch_oauth_token = "" # Optional
 ```
 `root_path` - path to a folder where you want your VODs to be saved to  
 `username` - name of the streamer you want to record by default  
 `client_id` - you can grab this from [here](https://dev.twitch.tv/console/apps) once you register your application  
 `client_secret` - you generate this [here](https://dev.twitch.tv/console/apps) as well, for your registered application
-`twitch_oauth_token` - personal OAuth token from Twitch
+`twitch_oauth_token` - personal OAuth token from Twitch (Optional)
 
 ### How to get Twitch OAuth Token
 Check [this document](https://streamlink.github.io/cli/plugins/twitch.html) for details.
