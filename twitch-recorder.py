@@ -41,6 +41,13 @@ class TwitchRecorder:
         self.url = "https://api.twitch.tv/helix/streams"
         self.access_token = self.fetch_access_token()
 
+        # twitch Oauth token
+        # Check if the user has provided a token in the config file
+        if hasattr(config,'twitch_oauth_token'):
+            self.twitch_oauth_token = config.twitch_oauth_token
+        else:
+            self.twitch_oauth_token = None
+
     def fetch_access_token(self):
         token_response = requests.post(self.token_url, timeout=15)
         token_response.raise_for_status()
@@ -149,9 +156,15 @@ class TwitchRecorder:
                 processed_filename = os.path.join(processed_path, filename)
 
                 # start streamlink process
-                subprocess.call(
-                    ["streamlink", "--twitch-disable-ads", "twitch.tv/" + self.username, self.quality,
-                     "-o", recorded_filename])
+                streamlink_args = ["streamlink"]
+                if self.twitch_oauth_token is not None:
+                    logging.info("Use Twitch OAuth token")
+                    streamlink_args.extend(["--twitch-oauth-token", "Authorization=\"OAuth " + self.twitch_oauth_token + "\""])
+                else:
+                    logging.info("Use --twitch-disable-ads option")
+                    streamlink_args.append("--twitch-disable-ads")
+                streamlink_args.extend(["twitch.tv/" + self.username, self.quality, "-o", recorded_filename])
+                subprocess.call(streamlink_args)
 
                 logging.info("recording stream is done, processing video file")
                 if os.path.exists(recorded_filename) is True:
