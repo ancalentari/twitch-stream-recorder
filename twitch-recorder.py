@@ -156,13 +156,10 @@ class TwitchRecorder:
                 processed_filename = os.path.join(processed_path, filename)
 
                 # start streamlink process
-                streamlink_args = ["streamlink"]
+                streamlink_args = ["streamlink", "--twitch-disable-ads"]
                 if self.twitch_oauth_token is not None:
                     logging.info("Use Twitch OAuth token")
                     streamlink_args.extend(["--twitch-api-header", "Authorization=\"OAuth " + self.twitch_oauth_token + "\""])
-                else:
-                    logging.info("Use --twitch-disable-ads option")
-                    streamlink_args.append("--twitch-disable-ads")
                 streamlink_args.extend(["twitch.tv/" + self.username, self.quality, "-o", recorded_filename])
                 subprocess.call(streamlink_args)
 
