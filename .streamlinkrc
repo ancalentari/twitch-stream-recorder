@@ -1,0 +1,7 @@
+stream-timeout=60
+stream-segment-threads=1
+stream-segment-attempts=5
+stream-segment-timeout=10
+http-timeout=20
+hls-playlist-reload-attempts=5
+hls-live-edge=5

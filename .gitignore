@@ -80,3 +80,5 @@ config.py
 *.log
 processed/
 recorded/
+
+.DS_store
