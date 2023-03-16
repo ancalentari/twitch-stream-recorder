@@ -1,6 +1,8 @@
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
+__pycache__/
+
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
@@ -74,3 +76,9 @@ fabric.properties
 .idea
 venv
 config.py
+
+*.log
+processed/
+recorded/
+
+.DS_store
