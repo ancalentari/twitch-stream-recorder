@@ -9,8 +9,7 @@ import shutil
 import time
 import requests
 from tqdm import tqdm
-
-import config
+import json
 
 class TwitchResponseStatus(enum.Enum):
     ONLINE = 0
@@ -22,19 +21,23 @@ class TwitchResponseStatus(enum.Enum):
 
 class TwitchRecorder:
     def __init__(self):
+  # Load configuration from config.json
+        with open("config.json", "r") as config_file:
+                    config_data = json.load(config_file)
+
         # Global configuration
-        self.ffmpeg_path = "ffmpeg"
-        self.disable_ffmpeg = False
-        self.refresh = max(15, config.refresh_interval)
-        self.root_path = config.root_path
+        self.ffmpeg_path = config_data["ffmpeg_path"]
+        self.disable_ffmpeg = config_data["disable_ffmpeg"]
+        self.refresh = config_data["refresh_interval"]
+        self.root_path = config_data["root_path"]
 
         # User configuration
-        self.username = config.username
-        self.quality = "best"
+        self.username = config_data["username"]
+        self.quality = config_data["stream_quality"]
 
         # Twitch configuration
-        self.client_id = config.client_id
-        self.client_secret = config.client_secret
+        self.client_id = config_data["client_id"]
+        self.client_secret = config_data["client_secret"]
         self.token_url = f"https://id.twitch.tv/oauth2/token?client_id={self.client_id}&client_secret={self.client_secret}&grant_type=client_credentials"
         self.url = "https://api.twitch.tv/helix/streams"
         self.access_token = self.fetch_access_token()
