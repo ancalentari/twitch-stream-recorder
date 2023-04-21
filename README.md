@@ -2,9 +2,11 @@
 
 Twitch Recorder is a Python script that automatically records live streams of a specified Twitch user, processes the video files, and saves them to your computer.
 Improved version of Ancalentari Twitch Stream Recorder
+
 ```md
 This script allows you to record twitch streams live to .mp4 files.  
 It is an improved version of [junian's twitch-recorder](https://gist.github.com/junian/b41dd8e544bf0e3980c971b0d015f5f6), migrated to [**helix**](https://dev.twitch.tv/docs/api) - the new twitch API. It uses OAuth2.
+
 ```
 
 ## Requirements
@@ -28,7 +30,6 @@ It is an improved version of [junian's twitch-recorder](https://gist.github.com/
 
 ``` bash
     pip install requests tqdm streamlink
-
 ```
 
 3. (Optional) Download FFmpeg from [FFmpeg.org](https://ffmpeg.org/download.html) and add the binary to your system's PATH.
@@ -37,7 +38,7 @@ It is an improved version of [junian's twitch-recorder](https://gist.github.com/
 
 Edit the `config.json` file to provide your Twitch API credentials and desired settings:
 
-    ```json
+```json
     {
       "ffmpeg_path": "path/to/ffmpeg",
       "disable_ffmpeg": false,
@@ -48,7 +49,7 @@ Edit the `config.json` file to provide your Twitch API credentials and desired s
       "client_id": "your_twitch_client_id",
       "client_secret": "your_twitch_client_secret"
     }
-    ```
+```
 
 - `ffmpeg_path`: Path to your FFmpeg binary (e.g., `C:\\ffmpeg\\bin\\ffmpeg.exe` on Windows or `/usr/local/bin/ffmpeg` on macOS/Linux)
 - `disable_ffmpeg`: Set to `true` to disable FFmpeg processing (default: `false`)
@@ -63,15 +64,15 @@ Edit the `config.json` file to provide your Twitch API credentials and desired s
 
 Run the Twitch Recorder script:
 
-    ```bash
+```bash
     python twitch_recorder.py
-    ```
+```
 
 You can also pass command-line arguments to override settings from the `config.json` file:
 
-    ```bash
+```bash
     python twitch_recorder.py -u <username> -q <quality> [--disable-ffmpeg]
-    ```
+```
 
 - `-u` or `--username`: Twitch username to monitor and record
 - `-q` or `--quality`: Desired stream quality (`best`, `1080p60`, `720p60`, etc.)
@@ -81,9 +82,9 @@ You can also pass command-line arguments to override settings from the `config.j
 
 By default, the script logs events to `twitch-recorder.log`. You can change the logging level by passing the `-l` or `--log` option followed by the desired level (e.g., `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`):
 
-    ```bash
-    python twitch_recorder.py -l DEBUG
-    ```
+```bash
+   python twitch_recorder.py -l DEBUG
+```
 
 ## License
 
