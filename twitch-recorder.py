@@ -8,8 +8,10 @@ import sys
 import shutil
 import time
 import requests
-from tqdm import tqdm
 import json
+from tqdm import tqdm
+from pathlib import Path
+
 
 class TwitchResponseStatus(enum.Enum):
     ONLINE = 0
@@ -32,6 +34,9 @@ class TwitchRecorder:
         self.root_path = config_data["root_path"]
 
         # User configuration
+        self.prune_after_days = config_data["prune_after_days"]
+        self.upload_to_network_drive_enabled = config_data["upload_to_network_drive"]
+        self.network_drive_path = config_data["network_drive_path"]
         self.username = config_data["username"]
         self.quality = config_data["stream_quality"]
 
@@ -66,6 +71,19 @@ class TwitchRecorder:
 
         return recorded_path, processed_path
 
+    def prune_old_files(self, path):
+        now = datetime.datetime.now()
+        for filepath in Path(path).glob('*'):
+            if filepath.is_file():
+                file_modified_time = datetime.datetime.fromtimestamp(filepath.stat().st_mtime)
+                age_in_days = (now - file_modified_time).days
+                if age_in_days > self.prune_after_days:
+                    try:
+                        filepath.unlink()
+                        logging.info(f"Deleted old file: {filepath}")
+                    except Exception as e:
+                        logging.error(f"Failed to delete old file: {e}")
+
     def process_previous_recordings(self, recorded_path, processed_path):
         video_list = [f for f in os.listdir(
             recorded_path) if os.path.isfile(os.path.join(recorded_path, f))]
@@ -84,6 +102,8 @@ class TwitchRecorder:
             logging.info(f"fixing {recorded_filename}")
             self.ffmpeg_copy_and_fix_errors(
                 recorded_filename, processed_filename)
+        if self.upload_to_network_drive_enabled:
+            self.upload_to_network_drive(processed_filename)
 
     def ffmpeg_copy_and_fix_errors(self, recorded_filename, processed_filename):
         try:
@@ -110,6 +130,16 @@ class TwitchRecorder:
                     return TwitchResponseStatus.NOT_FOUND, None
         return TwitchResponseStatus.ERROR, None
 
+    def upload_to_network_drive(self, processed_filename):
+        try:
+            filename = os.path.basename(processed_filename)
+            destination = os.path.join(self.network_drive_path, filename)
+            shutil.copy(processed_filename, destination)
+            logging.info(f"File uploaded to network drive: {destination}")
+        except Exception as e:
+            logging.error(f"Failed to upload file to network drive: {e}")
+
+
     def update_progress_bar(self, bar, recorded_filename):
         try:
             file_size = os.path.getsize(recorded_filename)
@@ -120,6 +150,9 @@ class TwitchRecorder:
     def loop_check(self, recorded_path, processed_path):
         while True:
             status, info = self.check_user()
+            self.prune_old_files(recorded_path)
+            self.prune_old_files(processed_path)
+            
             if status == TwitchResponseStatus.NOT_FOUND:
                 logging.error("username not found, invalid username or typo")
             elif status == TwitchResponseStatus.ERROR:

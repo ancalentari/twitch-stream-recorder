@@ -17,10 +17,10 @@ It is an improved version of [junian's twitch-recorder](https://gist.github.com/
 
 ## Features
 
-- Record Twitch live streams automatically
-- Process video files to fix errors
-- Save recordings to specified folders
-- Optional FFmpeg integration for processing
+- Record Twitch streams automatically when a streamer goes online
+- Save recordings to your local machine
+- Prune old files after a specified number of days
+- Optional feature to upload recorded streams to a network drive
 
 ## Installation
 
@@ -36,37 +36,27 @@ It is an improved version of [junian's twitch-recorder](https://gist.github.com/
 
 ## Configuration
 
-Edit the `config.json` file to provide your Twitch API credentials and desired settings:
+To configure the script, update the `config.json` file with the following information:
 
-```json
-    {
-      "ffmpeg_path": "path/to/ffmpeg",
-      "disable_ffmpeg": false,
-      "refresh_interval": 60,
-      "root_path": "path/to/recordings/folder",
-      "username": "twitch_username",
-      "stream_quality": "best",
-      "client_id": "your_twitch_client_id",
-      "client_secret": "your_twitch_client_secret"
-    }
-```
+- `root_path`: The root directory where recorded and processed files will be stored
+- `username`: Twitch username
+- `client_id`: Your Twitch client ID
+- `client_secret`: Your Twitch client secret
+- `ffmpeg_path`: Path to your FFmpeg executable (only needed if FFmpeg is not in your system PATH)
+- `disable_ffmpeg`: Set to `true` to disable FFmpeg processing of recorded files
+- `refresh_interval`: The interval (in seconds) at which the script checks if the streamer is online
+- `stream_quality`: The desired quality of the recorded stream (e.g., "best", "720p", etc.)
+- `prune_after_days`: The number of days after which old files will be deleted
+- `upload_to_network_drive`: Set to `true` to enable uploading files to a network drive
+- `network_drive_path`: The path to the network drive where files will be uploaded (if `upload_to_network_drive` is set to `true`)
 
-- `ffmpeg_path`: Path to your FFmpeg binary (e.g., `C:\\ffmpeg\\bin\\ffmpeg.exe` on Windows or `/usr/local/bin/ffmpeg` on macOS/Linux)
-- `disable_ffmpeg`: Set to `true` to disable FFmpeg processing (default: `false`)
-- `refresh_interval`: Time in seconds between checks for stream status (default: `60`)
-- `root_path`: Directory where recorded and processed videos will be stored
-- `username`: Twitch username to monitor and record
-- `stream_quality`: Desired stream quality (`best`, `1080p60`, `720p60`, etc.)
-- `client_id`: Your Twitch API client ID
-- `client_secret`: Your Twitch API client secret
 
 ## Usage
 
-Run the Twitch Recorder script:
-
-```bash
-    python twitch_recorder.py
-```
+1. Make sure you have Python 3.6 or newer installed on your system.
+2. Install the required Python packages: `pip install -r requirements.txt`
+3. Configure the `config.json` file with your desired settings.
+4. Run the script: `python twitch-recorder.py`
 
 You can also pass command-line arguments to override settings from the `config.json` file:
 

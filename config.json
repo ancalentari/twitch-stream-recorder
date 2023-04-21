@@ -6,5 +6,7 @@
     "ffmpeg_path": "ffmpeg",
     "disable_ffmpeg": false,
     "refresh_interval": 15,
-    "stream_quality": "best"
+    "stream_quality": "best",
+    "upload_to_network_drive": false,
+    "network_drive_path": "<path/to/your/network/drive>"
 }
