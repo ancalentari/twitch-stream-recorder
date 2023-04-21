@@ -7,11 +7,10 @@ import subprocess
 import sys
 import shutil
 import time
-
 import requests
+from tqdm import tqdm
 
 import config
-
 
 class TwitchResponseStatus(enum.Enum):
     ONLINE = 0
@@ -108,6 +107,13 @@ class TwitchRecorder:
                     return TwitchResponseStatus.NOT_FOUND, None
         return TwitchResponseStatus.ERROR, None
 
+    def update_progress_bar(self, bar, recorded_filename):
+        try:
+            file_size = os.path.getsize(recorded_filename)
+            bar.update(file_size - bar.n)
+        except FileNotFoundError:
+            pass
+    
     def loop_check(self, recorded_path, processed_path):
         while True:
             status, info = self.check_user()
@@ -139,10 +145,19 @@ class TwitchRecorder:
                 processed_filename = os.path.join(processed_path, filename)
 
                 # Start streamlink process
-                subprocess.call(["streamlink", "--twitch-disable-ads",
-                                f"twitch.tv/{self.username}", self.quality, "-o", recorded_filename])
+                streamlink_process = subprocess.Popen(
+                    ["streamlink", "--twitch-disable-ads", f"twitch.tv/{self.username}", self.quality, "-o", recorded_filename],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+
+                with tqdm(total=1, unit='B', unit_scale=True, desc=filename, ncols=100, position=0) as bar:
+                    while streamlink_process.poll() is None:
+                        self.update_progress_bar(bar, recorded_filename)
+                        time.sleep(1)
+                    self.update_progress_bar(bar, recorded_filename)
 
                 logging.info("recording stream is done, processing video file")
+                #
                 if os.path.exists(recorded_filename):
                     self.process_recorded_file(
                         recorded_filename, processed_filename)
