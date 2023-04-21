@@ -1,74 +1,89 @@
-# Ancalentari Twitch Stream Recorder
+# Twitch Recorder
+
+Twitch Recorder is a Python script that automatically records live streams of a specified Twitch user, processes the video files, and saves them to your computer.
+Improved version of Ancalentari Twitch Stream Recorder
+```
 This script allows you to record twitch streams live to .mp4 files.  
 It is an improved version of [junian's twitch-recorder](https://gist.github.com/junian/b41dd8e544bf0e3980c971b0d015f5f6), migrated to [**helix**](https://dev.twitch.tv/docs/api) - the new twitch API. It uses OAuth2.
+```
+
 ## Requirements
 1. [python3.8](https://www.python.org/downloads/release/python-380/) or higher  
 2. [streamlink](https://streamlink.github.io/)  
 3. [ffmpeg](https://ffmpeg.org/)
 
-## Setting up
-1) Check if you have latest version of streamlink:
-    * `streamlink --version` shows current version
-    * `streamlink --version-check` shows available upgrade
-    * `sudo pip install --upgrade streamlink` do upgrade
 
-2) Install `requests` module [if you don't have it](https://pypi.org/project/requests/)  
-   * Windows:    ```python -m pip install requests```  
-   * Linux:      ```python3.8 -m pip install requests```
-3) Create `config.py` file in the same directory as `twitch-recorder.py` with:
-```properties
-root_path = "/home/abathur/Videos/twitch"
-username = "forsen"
-client_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-client_secret = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-```
-`root_path` - path to a folder where you want your VODs to be saved to  
-`username` - name of the streamer you want to record by default  
-`client_id` - you can grab this from [here](https://dev.twitch.tv/console/apps) once you register your application  
-`client_secret` - you generate this [here](https://dev.twitch.tv/console/apps) as well, for your registered application
+## Features
 
-## Running script
-The script will be logging to a console and to a file `twitch-recorder.log`
-### On linux
-Run the script
-```shell script
-python3.8 twitch-recorder.py
-```
-To record a specific streamer use `-u` or `--username`
-```shell script
-python3.8 twitch-recorder.py --username forsen
-```
-To specify quality use `-q` or `--quality`
-```shell script
-python3.8 twitch-recorder.py --quality 720p
-```
-To change default logging use `-l`, `--log` or `--logging`
-```shell script
-python3.8 twitch-recorder.py --log warn
-```
-To disable ffmpeg processing (fixing errors in recorded file) use `--disable-ffmpeg`
-```shell script
-python3.8 twitch-recorder.py --disable-ffmpeg
-```
-If you want to run the script as a job in the background and be able to close the terminal:
-```shell script
-nohup python3.8 twitch-recorder.py >/dev/null 2>&1 &
-```
-In order to kill the job, you first list them all:
-```shell script
-jobs
-```
-The output should show something like this:
-```shell script
-[1]+  Running                 nohup python3.8 twitch-recorder > /dev/null 2>&1 &
-```
-And now you can just kill the job:
-```shell script
-kill %1
-```
-### On Windows
-You can run the scipt from `cmd` or [terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab), by simply going to the directory where the script is located at and using command:
-```shell script
-python twitch-recorder.py
-```
-The optional parameters should work exactly the same as on Linux.
+- Record Twitch live streams automatically
+- Process video files to fix errors
+- Save recordings to specified folders
+- Optional FFmpeg integration for processing
+
+## Installation
+
+1. Install Python 3.6 or newer from [Python.org](https://www.python.org/downloads/)
+
+2. Install the required Python packages:
+
+    ```
+    pip install requests tqdm streamlink
+    ```
+
+3. (Optional) Download FFmpeg from [FFmpeg.org](https://ffmpeg.org/download.html) and add the binary to your system's PATH.
+
+## Configuration
+
+Edit the `config.json` file to provide your Twitch API credentials and desired settings:
+
+    ```
+    {
+      "ffmpeg_path": "path/to/ffmpeg",
+      "disable_ffmpeg": false,
+      "refresh_interval": 60,
+      "root_path": "path/to/recordings/folder",
+      "username": "twitch_username",
+      "stream_quality": "best",
+      "client_id": "your_twitch_client_id",
+      "client_secret": "your_twitch_client_secret"
+    }
+    ```
+
+- `ffmpeg_path`: Path to your FFmpeg binary (e.g., `C:\\ffmpeg\\bin\\ffmpeg.exe` on Windows or `/usr/local/bin/ffmpeg` on macOS/Linux)
+- `disable_ffmpeg`: Set to `true` to disable FFmpeg processing (default: `false`)
+- `refresh_interval`: Time in seconds between checks for stream status (default: `60`)
+- `root_path`: Directory where recorded and processed videos will be stored
+- `username`: Twitch username to monitor and record
+- `stream_quality`: Desired stream quality (`best`, `1080p60`, `720p60`, etc.)
+- `client_id`: Your Twitch API client ID
+- `client_secret`: Your Twitch API client secret
+
+## Usage
+
+Run the Twitch Recorder script:
+
+    ```
+    python twitch_recorder.py
+    ```
+
+You can also pass command-line arguments to override settings from the `config.json` file:
+
+    ```
+    python twitch_recorder.py -u <username> -q <quality> [--disable-ffmpeg]
+    ```
+
+- `-u` or `--username`: Twitch username to monitor and record
+- `-q` or `--quality`: Desired stream quality (`best`, `1080p60`, `720p60`, etc.)
+- `--disable-ffmpeg`: Disable FFmpeg processing
+
+## Logging
+
+By default, the script logs events to `twitch-recorder.log`. You can change the logging level by passing the `-l` or `--log` option followed by the desired level (e.g., `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`):
+
+    ```
+    python twitch_recorder.py -l DEBUG
+    ```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
