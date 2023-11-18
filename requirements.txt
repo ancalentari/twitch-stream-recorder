@@ -2,3 +2,4 @@ requests==2.26.0
 streamlink==2.4.0
 tqdm==4.62.3
 psutil
+colorama==0.4.6
