@@ -69,13 +69,16 @@ class TwitchRecorder:
     def run(self):
         paths = self.create_directories()
         while True:
-            for username in self.usernames:
-                recorded_path, processed_path = paths[username]
-                self.process_previous_recordings(recorded_path, processed_path)
-                logging.info(f"checking for {username} every {self.refresh} seconds, recording with {self.quality} quality")
-                self.loop_check(username, recorded_path, processed_path)
+            if psutil.cpu_percent() < 50:  # Avoid starting new checks if CPU usage is high
+                for username in self.usernames:
+                    recorded_path, processed_path = paths[username]
+                    self.process_previous_recordings(recorded_path, processed_path)
+                    logging.info(f"checking for {username} every {self.refresh} seconds, recording with {self.quality} quality")
+                    self.loop_check(username, recorded_path, processed_path)
+            else:
+                logging.warning("High CPU usage detected. Pausing new checks temporarily.")
             time.sleep(self.refresh)
-
+        
     def create_directories(self):
         paths = {}
         for username in self.usernames:
@@ -120,7 +123,9 @@ class TwitchRecorder:
 
     def ffmpeg_copy_and_fix_errors(self, recorded_filename, processed_filename):
         try:
-            subprocess.call([self.ffmpeg_path, "-err_detect", "ignore_err", "-i", recorded_filename, "-c", "copy", processed_filename])
+                # Limiting resource usage of subprocess
+            subprocess.call([self.ffmpeg_path, "-err_detect", "ignore_err", "-i", recorded_filename, "-c", "copy", processed_filename],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             os.remove(recorded_filename)
         except Exception as e:
             logging.error(f"Error processing file with ffmpeg: {e}")
