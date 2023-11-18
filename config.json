@@ -1,12 +1,13 @@
 {
-    "root_path": "<your_root_path>",
-    "username": "<your_twitch_username>",
-    "client_id": "<your_twitch_client_id>",
-    "client_secret": "<your_twitch_client_secret>",
-    "ffmpeg_path": "ffmpeg",
+    "ffmpeg_path": "path/to/ffmpeg",
     "disable_ffmpeg": false,
     "refresh_interval": 15,
-    "stream_quality": "best",
+    "root_path": "path/to/your/root/directory",
+    "prune_after_days": 7,
     "upload_to_network_drive": false,
-    "network_drive_path": "<path/to/your/network/drive>"
+    "network_drive_path": "path/to/network/drive",
+    "usernames": ["username1", "username2"],
+    "stream_quality": "best",
+    "client_id": "YOUR_TWITCH_CLIENT_ID",
+    "client_secret": "YOUR_TWITCH_CLIENT_SECRET"
 }
