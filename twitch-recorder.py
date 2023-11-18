@@ -8,6 +8,7 @@ import sys
 import shutil
 import time
 import requests
+import psutil
 import json
 from tqdm import tqdm
 from pathlib import Path
@@ -32,6 +33,8 @@ class TwitchRecorder:
         self.disable_ffmpeg = config_data["disable_ffmpeg"]
         self.refresh = config_data["refresh_interval"]
         self.root_path = config_data["root_path"]
+        self.max_concurrent_recordings =config_data.get("max_concurrent_recordings",2) 
+        self.active_recordings = 0
 
         # User configuration
         self.prune_after_days = config_data["prune_after_days"]
@@ -47,11 +50,21 @@ class TwitchRecorder:
         self.url = "https://api.twitch.tv/helix/streams"
         self.access_token = self.fetch_access_token()
 
+    def can_start_new_recording(self):
+            if self.active_recordings >= self.max_concurrent_recordings:
+                return False
+            cpu_usage = psutil.cpu_percent()
+            memory_usage = psutil.virtual_memory().percent
+            if cpu_usage > 80 or memory_usage > 80:  # Adjust these thresholds as needed
+                return False
+            return True
+
     def fetch_access_token(self):
         token_response = requests.post(self.token_url, timeout=15)
         token_response.raise_for_status()
         token = token_response.json()
         return token["access_token"]
+
 
     def run(self):
         paths = self.create_directories()
@@ -161,42 +174,47 @@ class TwitchRecorder:
                 logging.info("unauthorized, refreshing access token")
                 self.access_token = self.fetch_access_token()
             elif status == TwitchResponseStatus.ONLINE:
-                logging.info(f"{username} online, starting recording")
+                 if self.can_start_new_recording():
+                    logging.info(f"{username} online, starting recording")
+                    self.active_recordings += 1
+                    channel = info["data"][0]
+                    filename = f"{username} - {datetime.datetime.now().strftime('%Y-%m-%d %Hh%Mm%Ss')} - {channel.get('title')}.mp4"
 
-                channel = info["data"][0]
-                filename = f"{username} - {datetime.datetime.now().strftime('%Y-%m-%d %Hh%Mm%Ss')} - {channel.get('title')}.mp4"
+                    # Clean filename from unnecessary characters
+                    filename = "".join(x for x in filename if x.isalnum() or x in [" ", "-", "_", "."])
 
-                # Clean filename from unnecessary characters
-                filename = "".join(x for x in filename if x.isalnum() or x in [" ", "-", "_", "."])
+                    recorded_filename = os.path.join(recorded_path, filename)
+                    processed_filename = os.path.join(processed_path, filename)
 
-                recorded_filename = os.path.join(recorded_path, filename)
-                processed_filename = os.path.join(processed_path, filename)
+                    # Start streamlink process
+                    streamlink_process = subprocess.Popen(
+                        ["streamlink", "--twitch-disable-ads", f"twitch.tv/{username}", self.quality, "-o", recorded_filename],
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                    )
 
-                # Start streamlink process
-                streamlink_process = subprocess.Popen(
-                    ["streamlink", "--twitch-disable-ads", f"twitch.tv/{username}", self.quality, "-o", recorded_filename],
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                )
-
-                with tqdm(total=1, unit='B', unit_scale=True, desc=filename, ncols=100, position=0) as bar:
-                    while streamlink_process.poll() is None:
+                    with tqdm(total=1, unit='B', unit_scale=True, desc=filename, ncols=100, position=0) as bar:
+                        while streamlink_process.poll() is None:
+                            self.update_progress_bar(bar, recorded_filename)
+                            time.sleep(1)
                         self.update_progress_bar(bar, recorded_filename)
-                        time.sleep(1)
-                    self.update_progress_bar(bar, recorded_filename)
 
-                logging.info("Recording stream is done, processing video file")
+                    logging.info("Recording stream is done, processing video file")
 
-                # Process the recorded file if it exists
-                if os.path.exists(recorded_filename):
-                    self.process_recorded_file(recorded_filename, processed_filename)
-                else:
-                    logging.info("Skip fixing, file not found")
+                    # Process the recorded file if it exists
+                    if os.path.exists(recorded_filename):
+                        self.process_recorded_file(recorded_filename, processed_filename)
+                    else:
+                        logging.info("Skip fixing, file not found")
 
-                logging.info("Processing is done")
+                    logging.info("Processing is done")
+                    self.active_recordings -= 1
+                 else:
+                    logging.info(f"Skipping recording for {username} due to high resource usage.")
         except Exception as e:
             logging.error(f"Unexpected error while checking or recording {username}: {e}")
-            time.sleep(300)  # wait for 5 minutes before retrying
-
+            # Decrement in case of error
+            self.active_recordings = max(0, self.active_recordings - 1)
+            time.sleep(300)
 
 def main(argv):
     twitch_recorder = TwitchRecorder()
