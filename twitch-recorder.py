@@ -187,10 +187,13 @@ class TwitchRecorder:
                         ["streamlink", "--twitch-disable-ads", f"twitch.tv/{username}", self.quality, "-o", recorded_filename],
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE
                     )
-
+                    # Check for errors
+                    if streamlink_process.stderr:
+                        logging.error(f"Streamlink error: {streamlink_process.stderr.read().decode('utf-8')}")
+                    
                     with tqdm(total=1, unit='B', unit_scale=True, desc=filename, ncols=None) as bar:
                         while streamlink_process.poll() is None:
-                            time.sleep(1)  # Update frequency
+                            time.sleep(5)  # Update frequency
                             self.update_progress_bar(bar, recorded_filename)
 
                         self.update_progress_bar(bar, recorded_filename)  # Final update after recording stops
@@ -217,8 +220,7 @@ def main(argv):
     logging.getLogger().addHandler(logging.StreamHandler())
 
     try:
-        opts, args = getopt.getopt(argv, "hu:q:l:", [
-                                   "usernames=", "quality=", "log=", "logging=", "disable-ffmpeg"])
+        opts, args = getopt.getopt(argv, "hu:q:l:", ["usernames=", "quality=", "log=", "logging=", "disable-ffmpeg"])
     except getopt.GetoptError:
         print(usage_message)
         sys.exit(2)
