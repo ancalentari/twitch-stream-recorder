@@ -1,0 +1,13 @@
+{
+    "ffmpeg_path": "path/to/ffmpeg",
+    "disable_ffmpeg": false,
+    "refresh_interval": 15,
+    "root_path": "path/to/your/root/directory",
+    "prune_after_days": 7,
+    "upload_to_network_drive": false,
+    "network_drive_path": "path/to/network/drive",
+    "usernames": ["username1", "username2"],
+    "stream_quality": "best",
+    "client_id": "YOUR_TWITCH_CLIENT_ID",
+    "client_secret": "YOUR_TWITCH_CLIENT_SECRET"
+}

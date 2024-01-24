@@ -1,74 +1,73 @@
-# Ancalentari Twitch Stream Recorder
-This script allows you to record twitch streams live to .mp4 files.  
-It is an improved version of [junian's twitch-recorder](https://gist.github.com/junian/b41dd8e544bf0e3980c971b0d015f5f6), migrated to [**helix**](https://dev.twitch.tv/docs/api) - the new twitch API. It uses OAuth2.
+# Twitch Recorder
+
+Twitch Recorder is a Python script for automatically recording live streams of specified Twitch users, processing the video files, and saving them to your computer. This script is an improved version of [junian's twitch-recorder](https://gist.github.com/junian/b41dd8e544bf0e3980c971b0d015f5f6), migrated to [**helix**](https://dev.twitch.tv/docs/api), the new Twitch API, and utilizes OAuth2.
+
 ## Requirements
-1. [python3.8](https://www.python.org/downloads/release/python-380/) or higher  
-2. [streamlink](https://streamlink.github.io/)  
-3. [ffmpeg](https://ffmpeg.org/)
 
-## Setting up
-1) Check if you have latest version of streamlink:
-    * `streamlink --version` shows current version
-    * `streamlink --version-check` shows available upgrade
-    * `sudo pip install --upgrade streamlink` do upgrade
+1. [Python 3.8](https://www.python.org/downloads/release/python-380/) or higher
+2. [Streamlink](https://streamlink.github.io/)
+3. [FFmpeg](https://ffmpeg.org/)
 
-2) Install `requests` module [if you don't have it](https://pypi.org/project/requests/)  
-   * Windows:    ```python -m pip install requests```  
-   * Linux:      ```python3.8 -m pip install requests```
-3) Create `config.py` file in the same directory as `twitch-recorder.py` with:
-```properties
-root_path = "/home/abathur/Videos/twitch"
-username = "forsen"
-client_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-client_secret = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-```
-`root_path` - path to a folder where you want your VODs to be saved to  
-`username` - name of the streamer you want to record by default  
-`client_id` - you can grab this from [here](https://dev.twitch.tv/console/apps) once you register your application  
-`client_secret` - you generate this [here](https://dev.twitch.tv/console/apps) as well, for your registered application
+## Features
 
-## Running script
-The script will be logging to a console and to a file `twitch-recorder.log`
-### On linux
-Run the script
-```shell script
-python3.8 twitch-recorder.py
+- Automatically record Twitch streams when a streamer goes online.
+- Save recordings to your local machine.
+- Prune old files after a specified number of days.
+- Optional feature to upload recorded streams to a network drive.
+- Enhanced resource monitoring to prevent system overloads.
+
+## Installation
+
+1. Install Python 3.8 or newer from [Python.org](https://www.python.org/downloads/).
+
+2. Install the required Python packages:
+   ```bash
+   pip install requests tqdm streamlink psutil colorama
+   ```
+
+3. (Optional) Download FFmpeg from [FFmpeg.org](https://ffmpeg.org/download.html) and add the binary to your system's PATH.
+
+## Configuration
+
+Update the `config.json` file with your preferences:
+
+- `root_path`: Directory for recorded and processed files.
+- `username`: Twitch username.
+- `client_id`: Your Twitch client ID.
+- `client_secret`: Your Twitch client secret.
+- `ffmpeg_path`: Path to FFmpeg executable (if not in PATH).
+- `disable_ffmpeg`: Disable FFmpeg processing (true/false).
+- `refresh_interval`: Interval in seconds for online checks.
+- `stream_quality`: Desired quality of recorded streams.
+- `prune_after_days`: Days after which to delete old files.
+- `upload_to_network_drive`: Enable uploading to network drive (true/false).
+- `network_drive_path`: Path for network drive uploads.
+
+## Usage
+
+1. Ensure Python 3.8+ is installed.
+2. Install required packages: `pip install -r requirements.txt`.
+3. Configure `config.json`.
+4. Run the script: `python twitch-recorder.py`.
+
+Command-line arguments to override `config.json`:
+
+```bash
+python twitch_recorder.py -u <username> -q <quality> [--disable-ffmpeg]
 ```
-To record a specific streamer use `-u` or `--username`
-```shell script
-python3.8 twitch-recorder.py --username forsen
+
+- `-u` or `--username`: Twitch username to monitor.
+- `-q` or `--quality`: Stream quality (e.g., "best", "1080p60").
+- `--disable-ffmpeg`: Disable FFmpeg processing.
+
+## Logging
+
+Logs events to `twitch-recorder.log`. Change log level with `-l` or `--log`:
+
+```bash
+python twitch_recorder.py -l DEBUG
 ```
-To specify quality use `-q` or `--quality`
-```shell script
-python3.8 twitch-recorder.py --quality 720p
-```
-To change default logging use `-l`, `--log` or `--logging`
-```shell script
-python3.8 twitch-recorder.py --log warn
-```
-To disable ffmpeg processing (fixing errors in recorded file) use `--disable-ffmpeg`
-```shell script
-python3.8 twitch-recorder.py --disable-ffmpeg
-```
-If you want to run the script as a job in the background and be able to close the terminal:
-```shell script
-nohup python3.8 twitch-recorder.py >/dev/null 2>&1 &
-```
-In order to kill the job, you first list them all:
-```shell script
-jobs
-```
-The output should show something like this:
-```shell script
-[1]+  Running                 nohup python3.8 twitch-recorder > /dev/null 2>&1 &
-```
-And now you can just kill the job:
-```shell script
-kill %1
-```
-### On Windows
-You can run the scipt from `cmd` or [terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab), by simply going to the directory where the script is located at and using command:
-```shell script
-python twitch-recorder.py
-```
-The optional parameters should work exactly the same as on Linux.
+
+## License
+
+This project is under the MIT License. See [LICENSE](LICENSE) for details.
