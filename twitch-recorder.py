@@ -174,6 +174,8 @@ def main(argv):
     except getopt.GetoptError:
         print(usage_message)
         sys.exit(2)
+
+    logging_level = logging.INFO  # Default logging level
     for opt, arg in opts:
         if opt == "-h":
             print(usage_message)
@@ -186,8 +188,8 @@ def main(argv):
             logging_level = getattr(logging, arg.upper(), None)
             if not isinstance(logging_level, int):
                 raise ValueError("invalid log level: %s" % logging_level)
-            logging.basicConfig(level=logging_level)
-            logging.info("logging configured to %s", arg.upper())
+            logging.info("logging configured to %s", arg.upper()) # Show this line in log anyway
+            logging.getLogger().setLevel(logging_level)
         elif opt == "--disable-ffmpeg":
             twitch_recorder.disable_ffmpeg = True
             logging.info("ffmpeg disabled")
