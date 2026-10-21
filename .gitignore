@@ -74,3 +74,28 @@ fabric.properties
 .idea
 venv
 config.py
+
+# Configuration (contains secrets)
+config/config.json
+config/eventsub-token.json
+config/eventsub-device.json
+.eventsub/
+.dashboard/
+
+# Recordings
+Recorded/
+
+# Logs
+logs/
+*.log
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Archives
+*.zip
+
+# Original repo (archived)
+original/
+combined-videos/

@@ -1,0 +1,29 @@
+[Unit]
+Description=Twitch Stream Recorder
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/twitch-recoder/twitch-stream-recorder
+ExecStart=/usr/bin/python3 /home/pi/twitch-recoder/twitch-stream-recorder/twitch-recorder.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=twitch-recorder
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/pi/twitch-recoder/twitch-stream-recorder/recording /home/pi/twitch-recoder/twitch-stream-recorder/logs /home/pi/twitch-recoder/twitch-stream-recorder
+
+# Resource limits
+MemoryLimit=512M
+CPUQuota=80%
+
+[Install]
+WantedBy=multi-user.target
