@@ -154,3 +154,10 @@ FFprobe are installed. Tests do not access Twitch or start Docker containers.
 ## License
 
 This project is under the MIT License. See [LICENSE](LICENSE) for details.
+
+### Compression benchmarks
+
+Run `./scripts/benchmark.sh` on the Pi to compare presets on short recording
+samples and save recommendations with preview clips. See the
+[benchmark guide](docs/COMPRESSION-BENCHMARK.md) for limits, recorder coordination,
+and how to interpret the estimates.

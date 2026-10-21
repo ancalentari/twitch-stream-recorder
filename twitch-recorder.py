@@ -988,8 +988,16 @@ class TwitchRecorder:
         os.close(fd)
         return path
 
+    def _background_pause_reason(self):
+        if self.active_recordings:
+            return 'recording'
+        from benchmark_control import active_benchmark
+        if active_benchmark(Path(__file__).resolve().parent):
+            return 'benchmark'
+        return None
+
     def _wait_for_compression_idle(self):
-        while self.active_recordings and not self._shutdown_event.is_set():
+        while self._background_pause_reason() and not self._shutdown_event.is_set():
             self._shutdown_event.wait(0.5)
         if self._shutdown_event.is_set():
             raise ProcessingInterrupted()
@@ -1015,6 +1023,8 @@ class TwitchRecorder:
     def _run_background_ffmpeg(self, command, timeout, pause_for_recordings=False):
         """Pause compression for recordings; cancel other work; always reap children."""
         self._check_processing_idle()
+        if pause_for_recordings:
+            self._wait_for_compression_idle()
         process = None
         self._processing_active.set()
         telemetry = getattr(self, '_telemetry', None)
@@ -1050,7 +1060,8 @@ class TwitchRecorder:
                         if self._shutdown_event.is_set():
                             raise ProcessingInterrupted()
                         if pause_for_recordings:
-                            if self.active_recordings:
+                            pause_reason = self._background_pause_reason()
+                            if pause_reason:
                                 if not suspended:
                                     try:
                                         control = psutil.Process(process.pid)
@@ -1060,9 +1071,9 @@ class TwitchRecorder:
                                             break
                                         raise
                                     suspended = True
-                                    capture.set_paused(True)
-                                    logging.info('Idle compression paused for recording (PID %s); progress retained', process.pid)
-                                    self._dashboard_event('compression-paused', 'Compression paused for recording; progress retained', command[-1])
+                                    logging.info('Idle compression paused for %s (PID %s); progress retained', pause_reason, process.pid)
+                                    self._dashboard_event('compression-paused', 'Compression paused for %s; progress retained' % pause_reason, command[-1])
+                                capture.set_paused(True, pause_reason)
                                 self._shutdown_event.wait(0.5)
                                 continue
                             if suspended:
@@ -1088,8 +1099,9 @@ class TwitchRecorder:
                             raise subprocess.TimeoutExpired(command, timeout)
                         self._shutdown_event.wait(0.5)
                     if pause_for_recordings:
-                        if self.active_recordings:
-                            capture.set_paused(True)
+                        pause_reason = self._background_pause_reason()
+                        if pause_reason:
+                            capture.set_paused(True, pause_reason)
                         self._wait_for_compression_idle()
                         capture.set_paused(False)
                     else:

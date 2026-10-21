@@ -235,10 +235,10 @@ def processing_queue(catalog, groups, config, busy=False, jobs=None, now=None):
     rows = []
     def append(row, kind, reason, required=0):
         paths = row.get('inputs', [row.get('path')])
-        paused = any(job.get('paused') and any(path in job.get('inputs', []) for path in paths) for job in jobs or [])
+        paused = next((job for job in jobs or [] if job.get('paused') and any(path in job.get('inputs', []) for path in paths)), None)
         state = 'Paused' if paused else 'Running' if any(path in active for path in paths) else 'Blocked' if row.get('blocked') else 'Waiting'
         rows.append(dict(kind=kind, channel=row['channel'], title=row['title'], path=paths[0], inputs=paths,
-                         state=state, reason='Paused for recording; progress retained' if paused else 'Active job' if state=='Running' else reason,
+                         state=state, reason=paused.get('phase', 'Paused for recording')+'; progress retained' if paused else 'Active job' if state=='Running' else reason,
                          attempts=row.get('attempts',0), required_bytes=required))
     for row in catalog:
         reason = 'Recording has priority' if busy else 'Next idle processing cycle'
@@ -294,6 +294,7 @@ class ProgressCapture:
         self.values = {}
         self.lock = threading.RLock()
         self.paused = False
+        self.pause_reason = 'recording'
         self.pause_started = None
         self.paused_seconds = 0
         self.started_monotonic = time.monotonic()
@@ -384,14 +385,15 @@ class ProgressCapture:
             speed = seconds / active_seconds if seconds > 0 else None
         self.job.update(media_seconds=seconds,percent=percent,speed=speed,
                         active_seconds=max(0, active_seconds), paused=self.paused,
-                        phase='Paused for recording' if self.paused else 'Finalizing / validating' if value=='end' else 'Processing')
+                        phase='Paused for '+self.pause_reason if self.paused else 'Finalizing / validating' if value=='end' else 'Processing')
         if advancing:
             self.job['progress_at']=time.time()
         if self.telemetry:
             self.telemetry.set_job(self.job)
 
-    def set_paused(self, paused):
+    def set_paused(self, paused, reason='recording'):
         with self.lock:
+            self.pause_reason = reason
             self._set_paused(paused)
 
     def _set_paused(self, paused):
@@ -405,7 +407,7 @@ class ProgressCapture:
             self.last_advance_at = now
             self.job['progress_at'] = time.time()
         self.job.update(paused=paused, paused_seconds=self.paused_seconds,
-                        phase='Paused for recording' if paused else 'Finalizing / validating' if self.values.get('progress')=='end' else 'Processing')
+                        phase='Paused for '+self.pause_reason if paused else 'Finalizing / validating' if self.values.get('progress')=='end' else 'Processing')
         if self.telemetry:
             self.telemetry.set_job(self.job)
 
@@ -585,6 +587,7 @@ class RecorderTelemetry(threading.Thread):
             self.last_notification_state=marker
         with self.recorder._recording_processes_lock:
             recording={name:process.pid for name,process in self.recorder._recording_processes.items() if process and process.poll() is None}
+            recording_pending=list(getattr(self.recorder, '_pending_recordings', []))
         with self.recorder._eventsub_recovery_lock:
             recovery=list(self.recorder._eventsub_recovery_users)
         groups=broadcast_groups(self.catalog,getattr(self.recorder,'stitch_max_gap_seconds',900))
@@ -592,7 +595,8 @@ class RecorderTelemetry(threading.Thread):
         pending=[dict(read_json(path,{}),request_id=path.stem) for path in (self.base/'.dashboard'/'commands').glob('*.json') if isinstance(read_json(path,{}),dict)]
         atomic_json(self.runtime/'status.json',dict(schema=1,pid=os.getpid(),heartbeat_at=now,stopping=self.stop.is_set(),
             catalog_version=self.version,catalog_at=self.catalog_at,catalog=self.catalog,catalog_errors=self.errors,
-            jobs=[job] if job else [],channels=channels,recording=recording,notifications=notifications,
+            jobs=[job] if job else [],channels=channels,recording=recording,recording_pending=recording_pending,
+            benchmark_coordination=True,notifications=notifications,
             eventsub_enabled=getattr(self.recorder,'eventsub_enabled',False),
             fallback_active=bool(getattr(self.recorder,'eventsub_enabled',False) and not notifications.get('connected')),
             recovery_users=recovery,queue=queue,config=self.config,history=self.journal.recent(),commands=pending))

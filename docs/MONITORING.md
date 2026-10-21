@@ -110,3 +110,7 @@ remotely in one command, allocate a terminal:
 ```bash
 ssh -t pi@raspberrypi.local /home/pi/twitch-recoder/twitch-stream-recorder/scripts/dashboard.sh
 ```
+
+The [benchmark companion](COMPRESSION-BENCHMARK.md) compares compression settings
+on short samples. While it runs, the dashboard shows **Paused for benchmark** for
+production compression. Recordings retain priority over both jobs.
